@@ -26,8 +26,8 @@ jobs:
           echo "Fetch list of artifacts from $SALSITA_REPO"
           API_URL="https://api.github.com/repos/$SALSITA_REPO/actions/artifacts"
           ARTIFACTS_JSON=$(curl --silent --header "Authorization: token $GITHUB_TOKEN" "$API_URL")
-          ARTIFACT_URLS=$(echo "$ARTIFACTS_JSON" | jq --raw-output '.artifacts[] | select(.name | test("^bench--")) | .archive_download_url')
-          for url in $ARTIFACT_URLS; do
+          echo "$ARTIFACTS_JSON" | jq --raw-output '.artifacts[] | select(.name | test("^bench--")) | "\(.name)\t\(.archive_download_url)"' | \
+          while $IFS=$'\t' read -r name url; do
             ARTIFACT_NAME=$(basename "$url")
             DEST_FILE="$DEST_DIR/$ARTIFACT_NAME.json"
             if [ -f "$DEST_FILE" ]; then
@@ -36,12 +36,9 @@ jobs:
             echo "Download $url"
             DEST_ARC="$DEST_DIR/$ARTIFACT_NAME.zip"
             curl --location --header "Authorization: token $GITHUB_TOKEN" --output "$DEST_ARC" "$url"
-            gzip --decompress "$DEST_ARC" > "$DEST_FILE"
+            unzip "$DEST_ARC" -d "$DEST_FILE"
             rm "$DEST_ARC"
           done
-      - name: Commit new benchmark results
-        run: |
-          set -euxo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if [ -n "$(git status --porcelain "$DEST_DIR")" ]; then
