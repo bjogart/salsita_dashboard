@@ -6,28 +6,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  fetch-artifacts:
+  fetch-benchmark-results:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Install dependencies
+      - name: Install jq
         run: sudo apt-get update && sudo apt-get install --yes jq
-
-      - name: Set variables
-        run: |
-          echo "SALSITA_REPO=bjogart/salsita" >> $GITHUB_ENV
-          echo "DEST_DIR=raw" >> $GITHUB_ENV
-          mkdir --parents $DEST_DIR
 
       - name: Download artifacts from Salsita repository
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SALSITA_REPO: ${{ env.SALSITA_REPO }}
-          DEST_DIR: ${{ env.DEST_DIR }}
+          SALSITA_REPO: "bjogart/salsita"
+          DEST_DIR: "raw"
         run: |
           set -euxo pipefail
+          mkdir --parents $DEST_DIR
           echo "Fetch list of artifacts from $SALSITA_REPO"
           API_URL="https://api.github.com/repos/$SALSITA_REPO/actions/artifacts"
           ARTIFACTS_JSON=$(curl --silent --header "Authorization: token $GITHUB_TOKEN" "$API_URL")
@@ -49,8 +44,8 @@ jobs:
           set -euxo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain raw/)" ]; then
-            git add raw/
+          if [ -n "$(git status --porcelain "$DEST_DIR")" ]; then
+            git add "$DEST_DIR"
             git commit -m "Add new benchmark results"
             git push
           else
