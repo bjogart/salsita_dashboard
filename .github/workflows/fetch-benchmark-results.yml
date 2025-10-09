@@ -22,20 +22,20 @@ jobs:
           DEST_DIR: "raw"
         run: |
           set -euxo pipefail
-          mkdir --parents $DEST_DIR
+          mkdir --parents "$DEST_DIR"
           echo "Fetch list of artifacts from $SALSITA_REPO"
           API_URL="https://api.github.com/repos/$SALSITA_REPO/actions/artifacts"
-          ARTIFACTS_JSON=$(curl --silent --header "Authorization: token $GITHUB_TOKEN" "$API_URL") | \
-          jq --raw-output '.artifacts[] | select(.name | test("^bench--")) | "\(.name)\t\(.archive_download_url)"' <<< $ARTIFACTS_JSON |
-          while $IFS=$'\t' read -r name url; do
-            DEST_FILE="$DEST_DIR/$name.json"
+          ARTIFACTS_JSON=$(curl --silent --header "Authorization: token $GITHUB_TOKEN" "$API_URL")
+          jq --raw-output '.artifacts[] | select(.name | test("^bench--")) | "\(.name)\t\(.archive_download_url)"' <<< "$ARTIFACTS_JSON" |
+          while IFS=$'\t' read -r name url; do
+            DEST_FILE="$DEST_DIR/${name}.json"
             if [ -f "$DEST_FILE" ]; then
               continue
             fi
             echo "Download $url"
-            DEST_ARC="$DEST_DIR/$name.zip"
+            DEST_ARC="$DEST_DIR/${name}.zip"
             curl --location --header "Authorization: token $GITHUB_TOKEN" --output "$DEST_ARC" "$url"
-            unzip "$DEST_ARC" -d "$DEST_FILE"
+            unzip "$DEST_ARC" -d "$DEST_DIR"
             rm "$DEST_ARC"
           done
           git config user.name "github-actions[bot]"
@@ -45,5 +45,5 @@ jobs:
             git commit -m "Add new benchmark results"
             git push
           else
-            echo "No new benchmark files to commit."
+            echo "No new benchmark files to commit"
           fi
