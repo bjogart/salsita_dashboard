@@ -1,0 +1,15 @@
+[package]
+name = "xtask"
+description = "Build scripts of Salsita's performance dashboard"
+version = "0.0.0"
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+time.workspace = true
+xflags.workspace = true
+xshell.workspace = true
