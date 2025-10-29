@@ -1,0 +1,50 @@
+name: pass-test-suite
+
+on:
+  pull_request:
+    branches:
+      - trunk
+
+permissions:
+  contents: read
+
+jobs:
+  pass-test-suite:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: test-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Setup stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup taplo
+        run: |
+          case "${{ runner.arch }}" in
+            "X86" | "X64")
+              RUNNER_ARCH="x86_64"
+              ;;
+            "ARM64")
+              RUNNER_ARCH="aarch64"
+              ;;
+            *)
+              echo "Unsupported architecture"
+              exit 1
+              ;;
+          esac
+          curl --location --silent "https://github.com/tamasfe/taplo/releases/latest/download/taplo-linux-${RUNNER_ARCH}.gz" | \
+            gzip --decompress > taplo && \
+            chmod +x taplo && \
+            sudo mv taplo "/usr/local/bin/taplo"
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Run tests
+        run: cargo xtask test
