@@ -46,9 +46,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if [ -n "$(git status --porcelain "$DEST_DIR")" ]; then
+            date=$(date '+%F')
+            branch="$date/bench-data"
+            git checkout -b $branch
             git add "$DEST_DIR"
-            git commit -m "Add new benchmark results"
-            git push
+            git commit -m "Benchmarks up to $date"
+            git push --set-upstream origin $branch
           else
             echo "No new benchmark files to commit"
           fi
