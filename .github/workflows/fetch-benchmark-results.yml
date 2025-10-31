@@ -44,13 +44,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if [ -n "$(git status --porcelain "$DEST_DIR")" ]; then
-            git pull
             date=$(date '+%F')
             branch="$date/bench-data"
             git checkout -B $branch
             git add "$DEST_DIR"
             git commit -m "Add benchmark data up to $date"
-            git push --set-upstream origin $branch
+            git push --force --set-upstream origin $branch
             gh pr create --fill
           else
             echo "No new benchmark files to commit"
