@@ -68,7 +68,7 @@ new Chart(ctx, {
           const clickedLabel =
             legend.chart.data.datasets[legendItem.datasetIndex].label || "";
           const bench = clickedLabel.split("/")[0];
-          if (e.ctrlKey || e.metaKey) {
+          if (e.native.ctrlKey || e.native.metaKey) {
             const vis = legend.chart.isDatasetVisible(legendItem.datasetIndex);
             legend.chart.setDatasetVisibility(legendItem.datasetIndex, !vis);
             legend.chart.update();
