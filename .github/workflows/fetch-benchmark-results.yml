@@ -17,9 +17,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install --yes jq
-
       - name: Download artifacts from Salsita repository
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
