@@ -34,6 +34,9 @@ for (const [benchName, scenarios] of Object.entries(benches)) {
       case "update":
         borderDash = [15, 5, 5, 5];
         break;
+      case "parallel":
+        borderDash = [30, 5];
+        break;
       default:
         borderDash = [3, 3];
     }
